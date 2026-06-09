@@ -2,13 +2,7 @@
 
 本文档说明 `viitorvoice/grpc_server/http/server.py` 暴露的端到端 HTTP 接口。
 
-默认示例使用公网地址：
-
-```text
-http://mrwaterzhou.uicp.io:38179
-```
-
-本地部署时可替换为：
+本地部署地址：
 
 ```text
 http://127.0.0.1:7861
@@ -178,7 +172,7 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 无请求参数。
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 curl "$BASE_URL/health"
 ```
 
@@ -224,8 +218,8 @@ curl "$BASE_URL/health"
 | `sample_rate` | int | `0` | 输入音频采样率；`0` 表示从文件解析 | `-F 'sample_rate=24000'` |
 | `input_format` | string | `wav` | 输入音频格式：`wav`、`flac`、`pcm_s16le` | `-F 'input_format=wav'` |
 | `output_format` | string | `wav` | 输出音频格式：`wav`、`flac`、`pcm_s16le` | `-F 'output_format=wav'` |
-| `num_steps` | int | `8` | LLM 生成步数 | `-F 'num_steps=8'` |
-| `cfg_scale` | float | `0.0` | classifier-free guidance scale | `-F 'cfg_scale=0.0'` |
+| `num_steps` | int | `32` | LLM 生成步数 | `-F 'num_steps=32'` |
+| `cfg_scale` | float | `2.0` | classifier-free guidance scale | `-F 'cfg_scale=2.0'` |
 | `emotion_guidance_scale` | float | `0.0` | leading emotion tag CFG scale; ignored when no `<|emotion-xxx|>` tag is present | `-F 'emotion_guidance_scale=6.0'` |
 | `nvv_guidance_scale` | float | `0.0` | NVV tag CFG scale; ignored when no NVV tag is present | `-F 'nvv_guidance_scale=2.0'` |
 | `position_temperature` | float | `1.0` | 位置采样温度 | `-F 'position_temperature=1.0'` |
@@ -241,7 +235,7 @@ curl "$BASE_URL/health"
 ### Curl 完整示例：提示音频
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_audio=@prompt.wav' \
@@ -252,8 +246,8 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_text_mask_len=10' \
   -F 'input_format=wav' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
-  -F 'cfg_scale=0.0' \
+  -F 'num_steps=32' \
+  -F 'cfg_scale=2.0' \
   -F 'position_temperature=1.0' \
   -F 'class_temperature=0.0' \
   -F 't_shift=0.1' \
@@ -267,14 +261,14 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 ### Curl 完整示例：提示 codebook
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_audio_codebook_file=@prompt_codebook.json;type=application/json' \
   -F 'text=hello from ViiTorVoice' \
   -F 'language=en' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
+  -F 'num_steps=32' \
   --output clone.wav
 ```
 
@@ -315,8 +309,8 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 | `edit_ref_context_frames` | int | `120` | 作为参考音色使用的上下文帧数 | `-F 'edit_ref_context_frames=120'` |
 | `preprocess_source_audio` | bool | 不设置 | 是否对源音频做预处理；不设置时使用服务默认值 | `-F 'preprocess_source_audio=true'` |
 | `postprocess_output` | bool | `true` | 是否对输出音频做后处理 | `-F 'postprocess_output=true'` |
-| `num_steps` | int | `8` | LLM 生成步数 | `-F 'num_steps=8'` |
-| `cfg_scale` | float | `0.0` | classifier-free guidance scale | `-F 'cfg_scale=0.0'` |
+| `num_steps` | int | `32` | LLM 生成步数 | `-F 'num_steps=32'` |
+| `cfg_scale` | float | `2.0` | classifier-free guidance scale | `-F 'cfg_scale=2.0'` |
 | `emotion_guidance_scale` | float | `0.0` | leading emotion tag CFG scale; ignored when no `<|emotion-xxx|>` tag is present | `-F 'emotion_guidance_scale=6.0'` |
 | `nvv_guidance_scale` | float | `0.0` | NVV tag CFG scale; ignored when no NVV tag is present | `-F 'nvv_guidance_scale=2.0'` |
 | `position_temperature` | float | `1.0` | 位置采样温度 | `-F 'position_temperature=1.0'` |
@@ -328,7 +322,7 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 ### Curl 完整示例
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'source_audio=@source.wav' \
@@ -345,8 +339,8 @@ curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'edit_ref_context_frames=120' \
   -F 'postprocess_output=true' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
-  -F 'cfg_scale=0.0' \
+  -F 'num_steps=32' \
+  -F 'cfg_scale=2.0' \
   -F 'position_temperature=1.0' \
   -F 'class_temperature=0.0' \
   -F 't_shift=0.1' \
@@ -370,7 +364,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 with open("prompt.wav", "rb") as audio_file:
     response = requests.post(
@@ -384,8 +378,8 @@ with open("prompt.wav", "rb") as audio_file:
             "ref_text_mask_len": "10",
             "input_format": "wav",
             "output_format": "wav",
-            "num_steps": "8",
-            "cfg_scale": "0.0",
+            "num_steps": "32",
+            "cfg_scale": "2.0",
             "position_temperature": "1.0",
             "class_temperature": "0.0",
             "t_shift": "0.1",
@@ -411,7 +405,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 codebook = {
     "values": [1, 2, 3],
@@ -425,7 +419,7 @@ response = requests.post(
         "text": "hello from ViiTorVoice",
         "language": "en",
         "output_format": "wav",
-        "num_steps": "8",
+        "num_steps": "32",
         "timeout_sec": "600",
     },
     timeout=620,
@@ -444,7 +438,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 audio_base64 = base64.b64encode(Path("prompt.wav").read_bytes()).decode("ascii")
 
@@ -471,7 +465,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 with open("source.wav", "rb") as audio_file:
     response = requests.post(
@@ -492,8 +486,8 @@ with open("source.wav", "rb") as audio_file:
             "postprocess_output": "true",
             "input_format": "wav",
             "output_format": "wav",
-            "num_steps": "8",
-            "cfg_scale": "0.0",
+            "num_steps": "32",
+            "cfg_scale": "2.0",
             "position_temperature": "1.0",
             "class_temperature": "0.0",
             "t_shift": "0.1",

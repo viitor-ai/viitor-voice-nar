@@ -72,17 +72,6 @@ curl "$BASE_URL/health"
 
 ### Voice Cloning
 
-Upload prompt audio for voice cloning:
-
-```bash
-curl -X POST "$BASE_URL/v1/voice-clone" \
-  -F 'ref_audio=@prompt.wav' \
-  -F 'text=The weather is nice today, so I want to take a walk after lunch.' \
-  -F 'language=en' \
-  -F 'output_format=wav' \
-  --output clone.wav
-```
-
 For no-ref-text cloning, omit `ref_text`:
 
 ```bash

@@ -2,13 +2,7 @@
 
 This document describes the end-to-end HTTP APIs exposed by `viitorvoice/grpc_server/http/server.py`.
 
-The examples use the public endpoint by default:
-
-```text
-http://mrwaterzhou.uicp.io:38179
-```
-
-For local deployment, replace it with:
+Local deployment URL:
 
 ```text
 http://127.0.0.1:7861
@@ -178,7 +172,7 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 No request parameters.
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 curl "$BASE_URL/health"
 ```
 
@@ -224,8 +218,8 @@ The prompt input must provide one of the following:
 | `sample_rate` | int | `0` | Input audio sample rate; `0` means parse it from the file | `-F 'sample_rate=24000'` |
 | `input_format` | string | `wav` | Input audio format: `wav`, `flac`, `pcm_s16le` | `-F 'input_format=wav'` |
 | `output_format` | string | `wav` | Output audio format: `wav`, `flac`, `pcm_s16le` | `-F 'output_format=wav'` |
-| `num_steps` | int | `8` | LLM generation steps | `-F 'num_steps=8'` |
-| `cfg_scale` | float | `0.0` | classifier-free guidance scale | `-F 'cfg_scale=0.0'` |
+| `num_steps` | int | `32` | LLM generation steps | `-F 'num_steps=32'` |
+| `cfg_scale` | float | `2.0` | classifier-free guidance scale | `-F 'cfg_scale=2.0'` |
 | `emotion_guidance_scale` | float | `0.0` | leading emotion tag CFG scale; ignored when no `<|emotion-xxx|>` tag is present | `-F 'emotion_guidance_scale=6.0'` |
 | `nvv_guidance_scale` | float | `0.0` | NVV tag CFG scale; ignored when no NVV tag is present | `-F 'nvv_guidance_scale=2.0'` |
 | `position_temperature` | float | `1.0` | Position sampling temperature | `-F 'position_temperature=1.0'` |
@@ -241,7 +235,7 @@ The prompt input must provide one of the following:
 ### Full curl example: prompt audio
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_audio=@prompt.wav' \
@@ -252,8 +246,8 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_text_mask_len=10' \
   -F 'input_format=wav' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
-  -F 'cfg_scale=0.0' \
+  -F 'num_steps=32' \
+  -F 'cfg_scale=2.0' \
   -F 'position_temperature=1.0' \
   -F 'class_temperature=0.0' \
   -F 't_shift=0.1' \
@@ -267,14 +261,14 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 ### Full curl example: prompt codebook
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/voice-clone" \
   -F 'ref_audio_codebook_file=@prompt_codebook.json;type=application/json' \
   -F 'text=hello from ViiTorVoice' \
   -F 'language=en' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
+  -F 'num_steps=32' \
   --output clone.wav
 ```
 
@@ -315,8 +309,8 @@ The source audio must provide one of the following:
 | `edit_ref_context_frames` | int | `120` | Context frames used as voice reference | `-F 'edit_ref_context_frames=120'` |
 | `preprocess_source_audio` | bool | Not set | Whether to preprocess source audio; when unset, the service default is used | `-F 'preprocess_source_audio=true'` |
 | `postprocess_output` | bool | `true` | Whether to postprocess output audio | `-F 'postprocess_output=true'` |
-| `num_steps` | int | `8` | LLM generation steps | `-F 'num_steps=8'` |
-| `cfg_scale` | float | `0.0` | classifier-free guidance scale | `-F 'cfg_scale=0.0'` |
+| `num_steps` | int | `32` | LLM generation steps | `-F 'num_steps=32'` |
+| `cfg_scale` | float | `2.0` | classifier-free guidance scale | `-F 'cfg_scale=2.0'` |
 | `emotion_guidance_scale` | float | `0.0` | leading emotion tag CFG scale; ignored when no `<|emotion-xxx|>` tag is present | `-F 'emotion_guidance_scale=6.0'` |
 | `nvv_guidance_scale` | float | `0.0` | NVV tag CFG scale; ignored when no NVV tag is present | `-F 'nvv_guidance_scale=2.0'` |
 | `position_temperature` | float | `1.0` | Position sampling temperature | `-F 'position_temperature=1.0'` |
@@ -328,7 +322,7 @@ The source audio must provide one of the following:
 ### Full curl example
 
 ```bash
-BASE_URL="http://mrwaterzhou.uicp.io:38179"
+BASE_URL="http://127.0.0.1:7861"
 
 curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'source_audio=@source.wav' \
@@ -345,8 +339,8 @@ curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'edit_ref_context_frames=120' \
   -F 'postprocess_output=true' \
   -F 'output_format=wav' \
-  -F 'num_steps=8' \
-  -F 'cfg_scale=0.0' \
+  -F 'num_steps=32' \
+  -F 'cfg_scale=2.0' \
   -F 'position_temperature=1.0' \
   -F 'class_temperature=0.0' \
   -F 't_shift=0.1' \
@@ -370,7 +364,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 with open("prompt.wav", "rb") as audio_file:
     response = requests.post(
@@ -384,8 +378,8 @@ with open("prompt.wav", "rb") as audio_file:
             "ref_text_mask_len": "10",
             "input_format": "wav",
             "output_format": "wav",
-            "num_steps": "8",
-            "cfg_scale": "0.0",
+            "num_steps": "32",
+            "cfg_scale": "2.0",
             "position_temperature": "1.0",
             "class_temperature": "0.0",
             "t_shift": "0.1",
@@ -411,7 +405,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 codebook = {
     "values": [1, 2, 3],
@@ -425,7 +419,7 @@ response = requests.post(
         "text": "hello from ViiTorVoice",
         "language": "en",
         "output_format": "wav",
-        "num_steps": "8",
+        "num_steps": "32",
         "timeout_sec": "600",
     },
     timeout=620,
@@ -444,7 +438,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 audio_base64 = base64.b64encode(Path("prompt.wav").read_bytes()).decode("ascii")
 
@@ -471,7 +465,7 @@ from pathlib import Path
 
 import requests
 
-BASE_URL = "http://mrwaterzhou.uicp.io:38179"
+BASE_URL = "http://127.0.0.1:7861"
 
 with open("source.wav", "rb") as audio_file:
     response = requests.post(
@@ -492,8 +486,8 @@ with open("source.wav", "rb") as audio_file:
             "postprocess_output": "true",
             "input_format": "wav",
             "output_format": "wav",
-            "num_steps": "8",
-            "cfg_scale": "0.0",
+            "num_steps": "32",
+            "cfg_scale": "2.0",
             "position_temperature": "1.0",
             "class_temperature": "0.0",
             "t_shift": "0.1",

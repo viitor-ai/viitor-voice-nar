@@ -72,17 +72,6 @@ curl "$BASE_URL/health"
 
 ### 语音克隆
 
-上传提示音频进行语音克隆：
-
-```bash
-curl -X POST "$BASE_URL/v1/voice-clone" \
-  -F 'ref_audio=@prompt.wav' \
-  -F 'text=The weather is nice today, so I want to take a walk after lunch.' \
-  -F 'language=en' \
-  -F 'output_format=wav' \
-  --output clone.wav
-```
-
 No-ref-text 克隆时可以不传 `ref_text`：
 
 ```bash
