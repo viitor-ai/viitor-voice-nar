@@ -1,0 +1,36 @@
+# gRPC / protobuf
+grpcio==1.62.3
+# Keep protobuf compatible with dualcodec -> descript-audiotools.
+# grpcio-tools requires protobuf>=4, so install it only in a separate proto
+# generation environment when regenerating stubs.
+# protobuf>=3.9.2,<3.20
+
+# HTTP gateway
+fastapi==0.136.1
+uvicorn==0.46.0
+python-multipart==0.0.28
+
+# Numeric / audio IO
+numpy==2.4.4
+soundfile==0.13.1
+pydub==0.25.1
+librosa==0.11.0
+scipy==1.17.1
+
+# Model runtime
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.8.0+cu128
+torchaudio==2.8.0+cu128
+transformers==4.57.6
+safetensors==0.7.0
+huggingface-hub==0.36.2
+tokenizers==0.22.2
+
+# ONNX / TensorRT runtime
+onnx==1.20.0
+onnxruntime-gpu==1.23.2
+tensorrt==10.14.1.48.post1
+
+# ViiTorVoice-related runtime packages
+# dualcodec==0.4.2
+qwen-asr==0.0.6

@@ -1,0 +1,1 @@
+"""Decoder module service."""

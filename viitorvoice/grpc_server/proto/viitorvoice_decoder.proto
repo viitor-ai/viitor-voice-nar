@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package viitorvoice.inference.v2;
+
+import "viitorvoice/grpc_server/proto/viitorvoice_common.proto";
+
+service ViiTorVoiceDecoderService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc DecodeAudio(DecodeAudioRequest) returns (DecodeAudioResponse);
+}
+
+message DecodeAudioRequest {
+  RequestContext context = 1;
+  repeated Int64Tensor audio_codebooks = 2;
+  bool postprocess_output = 3;
+  AudioFormat output_format = 4;
+}
+
+message DecodeAudioResponse {
+  ResponseContext context = 1;
+  AudioResult audio = 2;
+}

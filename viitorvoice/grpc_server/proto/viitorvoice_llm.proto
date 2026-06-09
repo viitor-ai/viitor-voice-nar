@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package viitorvoice.inference.v2;
+
+import "viitorvoice/grpc_server/proto/viitorvoice_common.proto";
+
+service ViiTorVoiceLLMService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc Generate(LLMGenerateRequest) returns (LLMGenerateResponse);
+  rpc GenerateFromSemantic(LLMGenerateFromSemanticRequest)
+      returns (LLMGenerateFromSemanticResponse);
+  rpc GenerateLocalEdit(LLMGenerateLocalEditRequest)
+      returns (LLMGenerateLocalEditResponse);
+}
+
+message LLMGenerateRequest {
+  RequestContext context = 1;
+  TextCondition condition = 2;
+  Int64Tensor ref_audio_codebook = 3;
+  GenerationConfig generation = 4;
+}
+
+message LLMGenerateResponse {
+  ResponseContext context = 1;
+  Int64Tensor generated_audio_codebook = 2;
+  repeated Int64Tensor generated_audio_codebooks = 3;
+}
+
+message LLMGenerateFromSemanticRequest {
+  RequestContext context = 1;
+  TextCondition condition = 2;
+  Int64Tensor ref_audio_codebook = 3;
+  Int64Tensor target_semantic_tokens = 4;
+  GenerationConfig generation = 5;
+}
+
+message LLMGenerateFromSemanticResponse {
+  ResponseContext context = 1;
+  Int64Tensor generated_audio_codebook = 2;
+  bool semantic_matches_target = 3;
+  uint32 remaining_mask_tokens = 4;
+}
+
+message LLMGenerateLocalEditRequest {
+  RequestContext context = 1;
+  string full_text = 2;
+  Int64Tensor target_audio_codebook = 3;
+  Int64Tensor editable_audio_mask = 4;
+  Int64Tensor ref_audio_codebook = 5;
+  string ref_text = 6;
+  string language = 7;
+  string instruct = 8;
+  optional uint32 ref_text_mask_len = 9;
+  GenerationConfig generation = 10;
+  optional uint32 edit_context_frames = 11;
+}
+
+message LLMGenerateLocalEditResponse {
+  ResponseContext context = 1;
+  Int64Tensor edited_audio_codebook = 2;
+  uint32 remaining_mask_tokens = 3;
+}

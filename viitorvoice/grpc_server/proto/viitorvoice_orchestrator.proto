@@ -1,0 +1,145 @@
+syntax = "proto3";
+
+package viitorvoice.inference.v2;
+
+import "viitorvoice/grpc_server/proto/viitorvoice_common.proto";
+import "viitorvoice/grpc_server/proto/viitorvoice_encoder.proto";
+
+service ViiTorVoiceOrchestratorService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc EncodeAudio(EncodeAudioRequest) returns (EncodeAudioResponse);
+  rpc Synthesize(SynthesizeRequest) returns (SynthesizeResponse);
+  rpc SemanticToWav(SemanticToWavRequest) returns (SemanticToWavResponse);
+  rpc AlignForEdit(AlignForEditRequest) returns (AlignForEditResponse);
+  rpc LocalEdit(LocalEditRequest) returns (LocalEditResponse);
+  rpc TextLocalEdit(TextLocalEditRequest) returns (TextLocalEditResponse);
+}
+
+message SynthesizeRequest {
+  RequestContext context = 1;
+  TextCondition condition = 2;
+  AudioInput ref_audio = 3;
+  Int64Tensor ref_audio_codebook = 4;
+  GenerationConfig generation = 5;
+  bool return_tokens = 6;
+  AudioFormat output_format = 7;
+}
+
+message SynthesizeResponse {
+  ResponseContext context = 1;
+  AudioResult audio = 2;
+  Int64Tensor generated_audio_codebook = 3;
+  Int64Tensor ref_audio_codebook = 4;
+  repeated string warnings = 5;
+}
+
+message SemanticToWavRequest {
+  RequestContext context = 1;
+  TextCondition condition = 2;
+  Int64Tensor ref_audio_codebook = 3;
+  Int64Tensor target_semantic_tokens = 4;
+  GenerationConfig generation = 5;
+  bool return_tokens = 6;
+  AudioFormat output_format = 7;
+  AudioInput ref_audio = 8;
+}
+
+message SemanticToWavResponse {
+  ResponseContext context = 1;
+  AudioResult audio = 2;
+  Int64Tensor generated_audio_codebook = 3;
+  bool semantic_matches_target = 4;
+  uint32 remaining_mask_tokens = 5;
+  repeated string warnings = 6;
+}
+
+message AlignForEditRequest {
+  RequestContext context = 1;
+  AudioInput source_audio = 2;
+  string original_text = 3;
+  string language = 4;
+  AlignmentGranularity granularity = 5;
+}
+
+message AlignForEditResponse {
+  ResponseContext context = 1;
+  repeated AlignmentItem alignments = 2;
+  Int64Tensor source_audio_codebook = 3;
+  uint32 sample_rate = 4;
+  repeated string warnings = 5;
+}
+
+message LocalEditRequest {
+  RequestContext context = 1;
+  AudioInput source_audio = 2;
+  Int64Tensor source_audio_codebook = 3;
+  string original_text = 4;
+  string language = 5;
+  repeated EditSegment edits = 6;
+  repeated AlignmentItem alignments = 7;
+  Int64Tensor ref_audio_codebook = 8;
+  optional uint32 left_context_frames = 9;
+  optional uint32 right_context_frames = 10;
+  optional uint32 min_mask_frames = 11;
+  GenerationConfig generation = 12;
+  bool return_tokens = 13;
+  AudioFormat output_format = 14;
+  optional float padding_ms = 15;
+  optional string length_mode = 16;
+  optional float manual_duration = 17;
+  optional uint32 manual_frames = 18;
+  optional float length_scale = 19;
+  optional uint32 edit_context_frames = 20;
+  optional uint32 edit_ref_context_frames = 21;
+  string ref_text = 22;
+  string instruct = 23;
+  optional uint32 ref_text_mask_len = 24;
+  optional bool preprocess_source_audio = 25;
+  optional bool postprocess_output = 26;
+  optional double source_audio_duration_sec = 27;
+  string align_granularity = 28;
+  optional float expand_mask_ratio = 29;
+}
+
+message LocalEditResponse {
+  ResponseContext context = 1;
+  AudioResult audio = 2;
+  string edited_text = 3;
+  Int64Tensor edited_audio_codebook = 4;
+  Int64Tensor source_audio_codebook = 5;
+  repeated AlignmentItem alignments = 6;
+  uint32 remaining_mask_tokens = 7;
+  repeated string warnings = 8;
+}
+
+message TextLocalEditRequest {
+  RequestContext context = 1;
+  AudioInput source_audio = 2;
+  string original_text = 3;
+  string edited_text = 4;
+  string language = 5;
+  GenerationConfig generation = 6;
+  AudioFormat output_format = 7;
+  optional float padding_ms = 8;
+  optional string length_mode = 9;
+  optional float manual_duration = 10;
+  optional uint32 manual_frames = 11;
+  optional float length_scale = 12;
+  optional uint32 min_mask_frames = 13;
+  optional uint32 edit_context_frames = 14;
+  optional uint32 edit_ref_context_frames = 15;
+  optional bool preprocess_source_audio = 16;
+  optional bool postprocess_output = 17;
+  string align_granularity = 18;
+  bool return_debug = 19;
+  optional float expand_mask_ratio = 20;
+}
+
+message TextLocalEditResponse {
+  ResponseContext context = 1;
+  AudioResult audio = 2;
+  repeated AlignmentItem alignments = 3;
+  repeated EditSegment edits = 4;
+  uint32 remaining_mask_tokens = 5;
+  repeated string warnings = 6;
+}

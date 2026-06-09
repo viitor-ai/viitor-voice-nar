@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package viitorvoice.inference.v2;
+
+import "viitorvoice/grpc_server/proto/viitorvoice_common.proto";
+
+service ViiTorVoiceEncoderService {
+  rpc Health(HealthRequest) returns (HealthResponse);
+  rpc EncodeAudio(EncodeAudioRequest) returns (EncodeAudioResponse);
+}
+
+message EncodeAudioRequest {
+  RequestContext context = 1;
+  AudioInput audio = 2;
+  bool preprocess_prompt = 3;
+  bool return_audio = 4;
+  optional bool can_trim_long_audio = 5;
+}
+
+message EncodeAudioResponse {
+  ResponseContext context = 1;
+  Int64Tensor audio_codebook = 2;
+  uint32 sample_rate = 3;
+  AudioResult preprocessed_audio = 4;
+}

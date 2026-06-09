@@ -1,0 +1,285 @@
+version: "3.9"
+
+services:
+  speech-edit-encoder:
+    container_name: speech-edit-encoder
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        PIP_MIRROR: ${PIP_MIRROR:-https://mirrors.cloud.tencent.com/pypi/simple}
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_DEVICE_ID: ${VIITORVOICE_DEVICE_ID:-0}
+      VIITORVOICE_WARMUP_ON_START: ${VIITORVOICE_WARMUP_ON_START:-true}
+      VIITORVOICE_V2_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_V2_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_V2_LOG_JSON: ${VIITORVOICE_V2_LOG_JSON:-true}
+      VIITORVOICE_LOCAL_MODELS: /workspace/local_models
+      VIITORVOICE_CODEC_DUALCODEC_PATH: ${VIITORVOICE_CODEC_DUALCODEC_PATH:-/workspace/local_models/dualcodec/dualcodec_ckpts}
+      VIITORVOICE_CODEC_ENCODER_MODEL_ID: ${VIITORVOICE_CODEC_ENCODER_MODEL_ID:-25hz_v1}
+      VIITORVOICE_CODEC_ENCODER_BACKEND: ${VIITORVOICE_CODEC_ENCODER_BACKEND:-torch}
+      VIITORVOICE_CODEC_ENCODER_PRECISION: ${VIITORVOICE_CODEC_ENCODER_PRECISION:-bf16}
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_ENCODER_HOST_PORT:-51051}:51051"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.encoder.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "51051"
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  speech-edit-llm:
+    container_name: speech-edit-llm
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_DEVICE_ID: ${VIITORVOICE_DEVICE_ID:-0}
+      VIITORVOICE_WARMUP_ON_START: ${VIITORVOICE_WARMUP_ON_START:-true}
+      VIITORVOICE_V2_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_V2_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_V2_LOG_JSON: ${VIITORVOICE_V2_LOG_JSON:-true}
+      VIITORVOICE_LOCAL_MODELS: /workspace/local_models
+      VIITORVOICE_LLM_CHECKPOINT: ${VIITORVOICE_LLM_CHECKPOINT:-/workspace/local_models/llm/0p6_emotion}
+      VIITORVOICE_LLM_ONNX: ${VIITORVOICE_LLM_ONNX:-/workspace/local_models/llm/0p6_emotion/.cache/onnx_backbone_fp32/llm_backbone_dynamic.onnx}
+      VIITORVOICE_LLM_BACKEND: ${VIITORVOICE_LLM_BACKEND:-onnx-trt}
+      VIITORVOICE_LLM_PRECISION: ${VIITORVOICE_LLM_PRECISION:-fp32}
+      VIITORVOICE_LLM_TRT_CACHE: ${VIITORVOICE_LLM_TRT_CACHE:-/workspace/local_models/llm/0p6_emotion/.cache/trt_cache}
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_LLM_HOST_PORT:-51052}:51052"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.llm.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "51052"
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  speech-edit-decoder:
+    container_name: speech-edit-decoder
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_DEVICE_ID: ${VIITORVOICE_DEVICE_ID:-0}
+      VIITORVOICE_WARMUP_ON_START: ${VIITORVOICE_WARMUP_ON_START:-true}
+      VIITORVOICE_V2_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_V2_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_V2_LOG_JSON: ${VIITORVOICE_V2_LOG_JSON:-true}
+      VIITORVOICE_LOCAL_MODELS: /workspace/local_models
+      VIITORVOICE_CODEC_DUALCODEC_PATH: ${VIITORVOICE_CODEC_DUALCODEC_PATH:-/workspace/local_models/dualcodec/dualcodec_ckpts}
+      VIITORVOICE_CODEC_DECODER_BACKEND: ${VIITORVOICE_CODEC_DECODER_BACKEND:-onnx-trt}
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_DECODER_HOST_PORT:-51053}:51053"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.decoder.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "51053"
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  speech-edit-orchestrator:
+    container_name: speech-edit-orchestrator
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    depends_on:
+      - speech-edit-encoder
+      - speech-edit-llm
+      - speech-edit-decoder
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_DEVICE_ID: ${VIITORVOICE_DEVICE_ID:-0}
+      VIITORVOICE_WARMUP_ON_START: ${VIITORVOICE_WARMUP_ON_START:-true}
+      VIITORVOICE_V2_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_V2_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_V2_LOG_JSON: ${VIITORVOICE_V2_LOG_JSON:-true}
+      VIITORVOICE_LOCAL_MODELS: /workspace/local_models
+      VIITORVOICE_ALIGNER_MODEL: ${VIITORVOICE_ALIGNER_MODEL:-/workspace/local_models/aligner/Qwen3-ForcedAligner-0.6B}
+      VIITORVOICE_ALIGNER_DEVICE: ${VIITORVOICE_ALIGNER_DEVICE:-cuda:0}
+      VIITORVOICE_ALIGNER_LANGUAGE: ${VIITORVOICE_ALIGNER_LANGUAGE:-zh}
+      VIITORVOICE_V2_ENCODER_TARGET: speech-edit-encoder:51051
+      VIITORVOICE_V2_LLM_TARGET: speech-edit-llm:51052
+      VIITORVOICE_V2_DECODER_TARGET: speech-edit-decoder:51053
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_ORCH_HOST_PORT:-50051}:50051"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.orchestrator.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "50051"
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  speech-edit-provider:
+    container_name: speech-edit-provider
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    depends_on:
+      - speech-edit-orchestrator
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_V2_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_V2_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_REQUEST_TIMEOUT_SEC: ${VIITORVOICE_REQUEST_TIMEOUT_SEC:-900}
+      VIITORVOICE_V2_LOG_JSON: ${VIITORVOICE_V2_LOG_JSON:-true}
+      SPEECH_EDIT_ORCHESTRATOR_TARGET: speech-edit-orchestrator:50051
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_PROVIDER_HOST_PORT:-50062}:50062"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.provider.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "50062"
+      - --orchestrator-target
+      - speech-edit-orchestrator:50051
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}
+
+  speech-edit-http:
+    container_name: speech-edit-http
+    image: speech-edit-grpc-v2:latest
+    restart: unless-stopped
+    working_dir: /workspace
+    depends_on:
+      - speech-edit-orchestrator
+    environment:
+      PYTHONUNBUFFERED: "1"
+      PYTHONPATH: /workspace
+      VIITORVOICE_GRPC_HOST: 0.0.0.0
+      VIITORVOICE_V2_HTTP_TARGET: speech-edit-orchestrator:50051
+      no_proxy: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      NO_PROXY: "127.0.0.1,localhost,0.0.0.0,speech-edit-encoder,speech-edit-llm,speech-edit-decoder,speech-edit-orchestrator,speech-edit-http,speech-edit-provider"
+      http_proxy: ""
+      https_proxy: ""
+      all_proxy: ""
+      HTTP_PROXY: ""
+      HTTPS_PROXY: ""
+      ALL_PROXY: ""
+    ports:
+      - "${VIITORVOICE_V2_HTTP_HOST_PORT:-7861}:7861"
+    volumes:
+      - .:/workspace
+    command:
+      - /opt/viitorvoice-runtime/.venv/bin/python
+      - -m
+      - viitorvoice.grpc_server.http.server
+      - --host
+      - 0.0.0.0
+      - --port
+      - "7861"
+      - --grpc-target
+      - speech-edit-orchestrator:50051
+      - --log-level
+      - ${VIITORVOICE_V2_LOG_LEVEL:-INFO}

@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package viitorvoice.inference.v2;
+
+enum ServiceState {
+  SERVICE_STATE_UNSPECIFIED = 0;
+  SERVICE_STATE_STARTING = 1;
+  SERVICE_STATE_READY = 2;
+  SERVICE_STATE_DEGRADED = 3;
+  SERVICE_STATE_STOPPING = 4;
+}
+
+enum AudioFormat {
+  AUDIO_FORMAT_UNSPECIFIED = 0;
+  AUDIO_FORMAT_WAV = 1;
+  AUDIO_FORMAT_PCM_S16LE = 2;
+  AUDIO_FORMAT_FLAC = 3;
+}
+
+enum AlignmentGranularity {
+  ALIGNMENT_GRANULARITY_UNSPECIFIED = 0;
+  ALIGNMENT_GRANULARITY_WORD = 1;
+  ALIGNMENT_GRANULARITY_CHARACTER = 2;
+}
+
+message RequestContext {
+  string trace_id = 1;
+  string request_id = 2;
+  string parent_span_id = 3;
+  string span_id = 4;
+  string caller = 5;
+  int64 deadline_ms = 6;
+  map<string, string> tags = 7;
+}
+
+message ResponseContext {
+  string trace_id = 1;
+  string request_id = 2;
+  string span_id = 3;
+  string service = 4;
+  string status = 5;
+  repeated StageMetric metrics = 6;
+}
+
+message StageMetric {
+  string service = 1;
+  string stage = 2;
+  int64 start_time_unix_ms = 3;
+  double duration_ms = 4;
+  map<string, string> input = 5;
+  map<string, string> output = 6;
+}
+
+message HealthRequest {
+  RequestContext context = 1;
+}
+
+message HealthResponse {
+  ResponseContext context = 1;
+  ServiceState state = 2;
+  string message = 3;
+  string version = 4;
+  repeated string active_backends = 5;
+  uint32 queued_jobs = 6;
+}
+
+message AudioInput {
+  oneof source {
+    bytes audio_bytes = 1;
+    string audio_path = 2;
+  }
+  uint32 sample_rate = 3;
+  AudioFormat format = 4;
+}
+
+message AudioResult {
+  bytes audio_bytes = 1;
+  uint32 sample_rate = 2;
+  AudioFormat format = 3;
+  uint32 channels = 4;
+  double duration_sec = 5;
+}
+
+message Int64Tensor {
+  repeated int64 values = 1;
+  repeated int64 shape = 2;
+}
+
+message FloatTensor {
+  repeated float values = 1;
+  repeated int64 shape = 2;
+}
+
+message GenerationConfig {
+  optional uint32 max_new_tokens = 1;
+  optional uint32 num_steps = 2;
+  optional float temperature = 3;
+  optional float top_p = 4;
+  optional uint32 top_k = 5;
+  optional float cfg_scale = 6;
+  optional uint64 seed = 7;
+  optional bool debug = 8;
+  optional string debug_request_id = 9;
+  optional uint32 request_timeout_sec = 10;
+  optional float t_shift = 11;
+  optional float layer_penalty_factor = 12;
+  optional float position_temperature = 13;
+  optional float class_temperature = 14;
+  optional bool denoise = 15;
+  optional bool preprocess_prompt = 16;
+  optional bool postprocess_output = 17;
+  optional float audio_chunk_duration = 18;
+  optional float audio_chunk_threshold = 19;
+  optional float duration = 20;
+  optional float speed = 21;
+  optional float emotion_guidance_scale = 22;
+  optional float nvv_guidance_scale = 23;
+}
+
+message TextCondition {
+  string text = 1;
+  string language = 2;
+  string ref_text = 3;
+  bool allow_missing_ref_text = 4;
+  uint32 ref_text_mask_len = 5;
+  string instruct = 6;
+}
+
+message AlignmentItem {
+  uint32 index = 1;
+  string text = 2;
+  double start_time = 3;
+  double end_time = 4;
+  int64 start_char = 5;
+  int64 end_char = 6;
+  bool has_start_char = 7;
+  bool has_end_char = 8;
+  string kind = 9;
+  int64 start_frame = 10;
+  int64 end_frame = 11;
+  int64 token_start = 12;
+  int64 token_end = 13;
+  float confidence = 14;
+}
+
+message EditSelection {
+  repeated uint32 alignment_indices = 1;
+  optional double start_sec = 2;
+  optional double end_sec = 3;
+  optional int64 start_frame = 4;
+  optional int64 end_frame = 5;
+}
+
+message EditSegment {
+  EditSelection selection = 1;
+  string replacement_text = 2;
+}

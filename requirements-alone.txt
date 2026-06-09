@@ -1,0 +1,2 @@
+dualcodec==0.4.2
+# protobuf==4.25.3

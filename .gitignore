@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+*.pyc
+local_models/
+tmp/
+logs/
+test_outputs/
+outputs/
+*.log
+nohup.out
+.DS_Store
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
