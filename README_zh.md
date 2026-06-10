@@ -1,6 +1,7 @@
 # ViiTorVoice-NAR
 
 [![Hugging Face Model](https://img.shields.io/badge/HuggingFace-Model-FFD21E?logo=huggingface)](https://huggingface.co/ZzWater/ViiTorVoice-NAR)
+[![Hugging Face Demo](https://img.shields.io/badge/HuggingFace-Demo-FFD21E?logo=huggingface)](https://huggingface.co/spaces/ZzWater/ViiTorVoice)
 [![English README](https://img.shields.io/badge/README-English-blue)](README.md)
 
 ViiTorVoice 是一个面向语音克隆与语音局部编辑的非自回归语音生成系统。项目当前以 gRPC v2 拆分服务作为主要部署路径，并提供 HTTP 网关用于端到端调用。

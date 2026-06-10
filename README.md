@@ -1,6 +1,7 @@
 # ViiTorVoice-NAR
 
 [![Hugging Face Model](https://img.shields.io/badge/HuggingFace-Model-FFD21E?logo=huggingface)](https://huggingface.co/ZzWater/ViiTorVoice-NAR)
+[![Hugging Face Demo](https://img.shields.io/badge/HuggingFace-Demo-FFD21E?logo=huggingface)](https://huggingface.co/spaces/ZzWater/ViiTorVoice)
 [![中文文档](https://img.shields.io/badge/README-%E4%B8%AD%E6%96%87-blue)](README_zh.md)
 
 ViiTorVoice is a non-autoregressive speech generation system for voice cloning and local speech editing. The current deployment path uses split gRPC v2 services, with an HTTP gateway for end-to-end calls.
