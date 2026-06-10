@@ -305,8 +305,8 @@ The source audio must provide one of the following:
 | `manual_frames` | int | Not set | Target replacement segment codec frame count when `length_mode=manual_frames` | `-F 'length_mode=manual_frames' -F 'manual_frames=20'` |
 | `length_scale` | float | Not set | Scale the automatically estimated length when `length_mode=auto` | `-F 'length_mode=auto' -F 'length_scale=1.2'` |
 | `min_mask_frames` | int | `6` | Minimum edit mask frame count | `-F 'min_mask_frames=6'` |
-| `edit_context_frames` | int | `40` | Model context frames kept on both sides of the edit region | `-F 'edit_context_frames=40'` |
-| `edit_ref_context_frames` | int | `120` | Context frames used as voice reference | `-F 'edit_ref_context_frames=120'` |
+| `edit_context_frames` | int | unset | Model context frames kept on both sides of the edit region; unset uses the full target sequence | `-F 'edit_context_frames=40'` |
+| `edit_ref_context_frames` | int | `300` | Context frames used as voice reference | `-F 'edit_ref_context_frames=300'` |
 | `preprocess_source_audio` | bool | Not set | Whether to preprocess source audio; when unset, the service default is used | `-F 'preprocess_source_audio=true'` |
 | `postprocess_output` | bool | `true` | Whether to postprocess output audio | `-F 'postprocess_output=true'` |
 | `num_steps` | int | `32` | LLM generation steps | `-F 'num_steps=32'` |
@@ -335,8 +335,7 @@ curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'length_mode=auto' \
   -F 'length_scale=1.1' \
   -F 'min_mask_frames=6' \
-  -F 'edit_context_frames=40' \
-  -F 'edit_ref_context_frames=120' \
+  -F 'edit_ref_context_frames=300' \
   -F 'postprocess_output=true' \
   -F 'output_format=wav' \
   -F 'num_steps=32' \
@@ -481,8 +480,7 @@ with open("source.wav", "rb") as audio_file:
             "length_mode": "auto",
             "length_scale": "1.1",
             "min_mask_frames": "6",
-            "edit_context_frames": "40",
-            "edit_ref_context_frames": "120",
+            "edit_ref_context_frames": "300",
             "postprocess_output": "true",
             "input_format": "wav",
             "output_format": "wav",

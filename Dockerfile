@@ -1,6 +1,10 @@
+# syntax=docker/dockerfile:1.4
 FROM nvcr.nju.edu.cn/nvidia/tritonserver:25.03-py3
 
 ARG PIP_MIRROR=https://mirrors.cloud.tencent.com/pypi/simple
+ARG DOWNLOAD_MODEL=true
+ARG HF_MODEL_REPO=ZzWater/ViiTorVoice-NAR
+ARG MODEL_DIR=/workspace/local_models
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -33,12 +37,34 @@ RUN uv venv --python 3.12 && \
     . .venv/bin/activate && \
     uv pip install -r /tmp/viitorvoice-env/requirements-grpc.txt && \
     uv pip install -r /tmp/viitorvoice-env/requirements-alone.txt && \
-    uv pip install protobuf==4.25.3
+    uv pip install protobuf==4.25.3 huggingface_hub[cli]
+
+# Match README_zh.md: keep real model files under repository-root local_models/.
+# Set --build-arg DOWNLOAD_MODEL=false to skip the build-time Hugging Face check/download.
+RUN --mount=type=bind,source=.,target=/tmp/build-context,readonly \
+    mkdir -p "${MODEL_DIR}" && \
+    if [ "${DOWNLOAD_MODEL}" = "true" ]; then \
+      if [ -L /tmp/build-context/local_models ] || \
+         { [ -d /tmp/build-context/local_models ] && find /tmp/build-context/local_models -type l -print -quit | grep -q .; }; then \
+        echo "Model files under local_models must be real files, not symlinks." >&2; \
+        exit 1; \
+      fi; \
+      if [ ! -d /tmp/build-context/local_models/llm/0p6_emotion ] || \
+         [ ! -d /tmp/build-context/local_models/dualcodec/dualcodec_ckpts ] || \
+         [ ! -d /tmp/build-context/local_models/aligner/Qwen3-ForcedAligner-0.6B ]; then \
+        /opt/viitorvoice-runtime/.venv/bin/huggingface-cli download "${HF_MODEL_REPO}" \
+          --local-dir "${MODEL_DIR}" \
+          --local-dir-use-symlinks False; \
+      else \
+        echo "Required model files already exist under local_models; skip download."; \
+      fi; \
+    fi
 
 # Runtime defaults (can be overridden by docker-compose env)
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/workspace
 ENV VIRTUAL_ENV=/opt/viitorvoice-runtime/.venv
+ENV VIITORVOICE_LOCAL_MODELS=${MODEL_DIR}
 ENV PATH="/opt/viitorvoice-runtime/.venv/bin:/root/.local/bin:${PATH}"
 
 EXPOSE 50051

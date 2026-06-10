@@ -305,8 +305,8 @@ curl -X POST "$BASE_URL/v1/voice-clone" \
 | `manual_frames` | int | 不设置 | `length_mode=manual_frames` 时手动指定替换片段目标 codec 帧数 | `-F 'length_mode=manual_frames' -F 'manual_frames=20'` |
 | `length_scale` | float | 不设置 | `length_mode=auto` 时，在自动估计长度基础上缩放 | `-F 'length_mode=auto' -F 'length_scale=1.2'` |
 | `min_mask_frames` | int | `6` | 最小编辑 mask 帧数 | `-F 'min_mask_frames=6'` |
-| `edit_context_frames` | int | `40` | 编辑区域左右保留的模型上下文帧数 | `-F 'edit_context_frames=40'` |
-| `edit_ref_context_frames` | int | `120` | 作为参考音色使用的上下文帧数 | `-F 'edit_ref_context_frames=120'` |
+| `edit_context_frames` | int | 未设置 | 编辑区域左右保留的模型上下文帧数；未设置时使用完整目标序列 | `-F 'edit_context_frames=40'` |
+| `edit_ref_context_frames` | int | `300` | 作为参考音色使用的上下文帧数 | `-F 'edit_ref_context_frames=300'` |
 | `preprocess_source_audio` | bool | 不设置 | 是否对源音频做预处理；不设置时使用服务默认值 | `-F 'preprocess_source_audio=true'` |
 | `postprocess_output` | bool | `true` | 是否对输出音频做后处理 | `-F 'postprocess_output=true'` |
 | `num_steps` | int | `32` | LLM 生成步数 | `-F 'num_steps=32'` |
@@ -335,8 +335,7 @@ curl -X POST "$BASE_URL/v1/text-local-edit" \
   -F 'length_mode=auto' \
   -F 'length_scale=1.1' \
   -F 'min_mask_frames=6' \
-  -F 'edit_context_frames=40' \
-  -F 'edit_ref_context_frames=120' \
+  -F 'edit_ref_context_frames=300' \
   -F 'postprocess_output=true' \
   -F 'output_format=wav' \
   -F 'num_steps=32' \
@@ -481,8 +480,7 @@ with open("source.wav", "rb") as audio_file:
             "length_mode": "auto",
             "length_scale": "1.1",
             "min_mask_frames": "6",
-            "edit_context_frames": "40",
-            "edit_ref_context_frames": "120",
+            "edit_ref_context_frames": "300",
             "postprocess_output": "true",
             "input_format": "wav",
             "output_format": "wav",
